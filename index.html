@@ -119,6 +119,7 @@ a:hover{text-decoration:underline}
     <p class="subtitle">Project Hub — A theological research engine built on primary sources, semantic search, and citation-grounded AI. Pick your role, join the team, and help build the future of theological research.</p>
     <div class="links">
       <a href="#architecture">Architecture</a>
+      <a href="#sources">Corpus Sources</a>
       <a href="#tasks">Task Board</a>
       <a href="#team">Join Team</a>
     </div>
@@ -192,7 +193,26 @@ a:hover{text-decoration:underline}
         </div>
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:.75rem;color:var(--text-dim)">
           <strong style="color:var(--text)">Tech Stack:</strong><br>
-          Nuxt 4 / Tailwind / NestJS / FastAPI / PostgreSQL+pgvector / OpenSearch / OpenAI
+          Nuxt 4 / Tailwind / FastAPI / PostgreSQL + pgvector (hybrid: vector + tsvector full-text) / Claude or OpenAI API<br>
+          <span style="opacity:.75">Hosting: Supabase + Vercel. One backend, one database — OpenSearch only if we outgrow Postgres (&gt;1M chunks).</span>
+        </div>
+      </div>
+      <div class="panel" id="sources">
+        <h3>Corpus Sources</h3>
+        <div style="font-size:.78rem;line-height:1.9">
+          <strong style="color:var(--text)">Structured confessions (start here)</strong><br>
+          <a href="https://github.com/NonlinearFruit/Creeds.json" target="_blank">Creeds.json</a> — creeds/confessions/catechisms in JSON<br>
+          <a href="https://github.com/reformed-standards/compendium" target="_blank">reformed-standards/compendium</a> — Markdown<br>
+          <strong style="color:var(--text);display:inline-block;margin-top:8px">Public domain libraries (pre-1931 = PD)</strong><br>
+          <a href="https://ccel.org" target="_blank">CCEL</a> — ANF/NPNF (38 vols), Calvin, Owen, Hodge<br>
+          <a href="https://monergism.com" target="_blank">Monergism</a> — free Reformed ePub/PDF library<br>
+          <a href="https://www.gutenberg.org" target="_blank">Gutenberg</a> / <a href="https://archive.org" target="_blank">Archive.org</a> — PD fallback<br>
+          <a href="https://prdl.org" target="_blank">PRDL</a> — post-Reformation scholarly index<br>
+          <strong style="color:var(--text);display:inline-block;margin-top:8px">Confession texts + proof texts</strong><br>
+          <a href="https://www.apuritansmind.com/westminster-standards/" target="_blank">A Puritan's Mind</a> · <a href="https://reformed.org/historic-confessions/" target="_blank">Reformed.org</a> · <a href="https://thewestminsterstandard.org" target="_blank">Westminster Standard</a><br>
+          <strong style="color:var(--text);display:inline-block;margin-top:8px">Patristics &amp; Scripture</strong><br>
+          <a href="http://earlychristianwritings.com" target="_blank">Early Christian Writings</a> · <a href="https://ebible.org" target="_blank">eBible</a> / <a href="https://berean.bible" target="_blank">BSB</a> (PD Bibles)<br>
+          <span style="color:var(--text-dim);display:inline-block;margin-top:8px;opacity:.8">© layer (Bavinck ET, Berkhof, Sproul, Murray): publisher licensing — Phase 3.</span>
         </div>
       </div>
     </div>
@@ -284,14 +304,16 @@ const STORAGE_KEY = 'churchlife_hub_v1';
 
 // Default sections (used on first load or reset)
 const DEFAULT_SECTIONS = [
-  {id:'source-library',icon:'\uD83D\uDCDA',title:'1. Source Library',desc:'Curated corpus of Christian writings — Apostolic Fathers, Ante-Nicene, Nicene & Post-Nicene, Councils, Creeds, Confessions, Catechisms, Medieval, Reformation, Modern Scholarship.',tasks:[
-    {title:'Define source document metadata schema',desc:'',priority:'high',status:'todo',assignee:''},
-    {title:'Collect and digitize Apostolic Fathers texts',desc:'',priority:'high',status:'todo',assignee:''},
-    {title:'Collect Ante-Nicene Fathers (ANF) corpus',desc:'',priority:'med',status:'todo',assignee:''},
-    {title:'Collect Nicene & Post-Nicene Fathers (NPNF) corpus',desc:'',priority:'med',status:'todo',assignee:''},
-    {title:'Collect Ecumenical & Regional Council documents',desc:'',priority:'med',status:'todo',assignee:''},
-    {title:'Collect Creeds, Confessions, and Catechisms',desc:'',priority:'low',status:'todo',assignee:''},
-    {title:'Collect Medieval and Reformation theology texts',desc:'',priority:'low',status:'todo',assignee:''}
+  {id:'source-library',icon:'📚',title:'1. Source Library (Phase 0 — Corpus Sprint)',desc:'Curated corpus, apostolic to current: ecumenical creeds → Reformed confessions (norma normata) → Fathers, Reformers, Puritans, Old Princeton. Nearly everything pre-1931 is public domain. Copyrighted modern works (Bavinck ET, Berkhof, Sproul) come via publisher licensing in Phase 3.',tasks:[
+    {title:'Define chunk metadata schema',desc:'author, work, year, tier, section_ref (e.g. WCF 10.1), source_url, license',priority:'high',status:'todo',assignee:''},
+    {title:'Ingest Creeds.json — confessions already in JSON',desc:'github.com/NonlinearFruit/Creeds.json — check per-file license. Fastest demo: ask-the-confessions with real citations.',priority:'high',status:'todo',assignee:''},
+    {title:'Ingest Westminster Standards + Three Forms of Unity with proof texts',desc:'WCF/WLC/WSC + Belgic, Heidelberg, Dort. The citation backbone.',priority:'high',status:'todo',assignee:''},
+    {title:'Build CCEL scraper — ANF/NPNF (38 vols)',desc:'ccel.org, clean HTML/XML, public domain',priority:'high',status:'todo',assignee:''},
+    {title:'Ingest Calvin — Institutes + 45 commentary volumes',desc:'ccel.org, Beveridge/Allen translations, public domain',priority:'med',status:'todo',assignee:''},
+    {title:'Ingest PD systematics — Hodge (3 vols), Dabney, Shedd',desc:'Best RAG performance per page',priority:'med',status:'todo',assignee:''},
+    {title:'Ingest Owen (24 vols) + Puritans via Monergism',desc:'Watson, Flavel, Sibbes, Charnock, Boston, Edwards',priority:'med',status:'todo',assignee:''},
+    {title:'Ingest public domain Bibles (KJV, Geneva, WEB, BSB)',desc:'ebible.org, berean.bible. ESV via Crossway license later.',priority:'med',status:'todo',assignee:''},
+    {title:'Verify license status per source before ingestion',desc:'Rule of thumb: US pre-1931 = public domain',priority:'high',status:'todo',assignee:''}
   ]},
   {id:'parsing-pipeline',icon:'\u2699\uFE0F',title:'2. Parsing & Indexing Pipeline',desc:'Transform every document into structured, searchable data — cleaning, chunking, metadata extraction, concept extraction, doctrine classification, embedding generation.',tasks:[
     {title:'Build text cleaning & normalization module',desc:'',priority:'high',status:'todo',assignee:''},
@@ -319,14 +341,15 @@ const DEFAULT_SECTIONS = [
     {title:'Build semantic search with pgvector',desc:'',priority:'high',status:'todo',assignee:''},
     {title:'Implement doctrine weighting',desc:'',priority:'med',status:'todo',assignee:''},
     {title:'Build fusion algorithm (weighted score combination)',desc:'',priority:'med',status:'todo',assignee:''},
-    {title:'Set up OpenSearch or Meilisearch',desc:'',priority:'med',status:'todo',assignee:''}
+    {title:'Postgres tsvector full-text + reciprocal rank fusion',desc:'No OpenSearch until >1M chunks — one database to operate',priority:'med',status:'todo',assignee:''}
   ]},
   {id:'ai-assistant',icon:'\uD83E\uDD16',title:'6. AI Research Assistant',desc:'The LLM never answers from memory. It receives user question + retrieved passages + metadata + citation rules. Output: summary, historical overview, primary source quotes, comparison by tradition, citations.',tasks:[
     {title:'Design citation-grounded prompt templates',desc:'',priority:'high',status:'todo',assignee:''},
     {title:'Build Model A — Theology Parser',desc:'',priority:'high',status:'todo',assignee:''},
     {title:'Build Model B — Retrieval Ranker',desc:'',priority:'med',status:'todo',assignee:''},
     {title:'Build Model C — Research Assistant',desc:'',priority:'med',status:'todo',assignee:''},
-    {title:'Implement anti-hallucination guardrails',desc:'',priority:'high',status:'todo',assignee:''},
+    {title:'Implement anti-hallucination guardrails',desc:'Grounding contract: answer only from retrieved chunks; every claim cited; Scripture final authority, confessions subordinate standards; say so when corpus is silent',priority:'high',status:'todo',assignee:''},
+    {title:'Build 150-question confessional eval set',desc:'Ordo salutis, TULIP, covenant theology, sacraments, polity + trap questions (Arminian framings, Roman objections). Every pipeline change runs against it.',priority:'high',status:'todo',assignee:''},
     {title:'Build response formatter (summary, quotes, citations)',desc:'',priority:'med',status:'todo',assignee:''}
   ]},
   {id:'knowledge-graph',icon:'\uD83D\uDD78\uFE0F',title:'7. Knowledge Graph',desc:'Long-term competitive advantage. Map relationships: Augustine influenced Calvin, debated Pelagius, discusses Grace. Predestination related to Election, Grace, etc.',tasks:[
@@ -335,15 +358,21 @@ const DEFAULT_SECTIONS = [
     {title:'Build graph visualization (interactive)',desc:'',priority:'low',status:'todo',assignee:''},
     {title:'Populate seed relationships',desc:'',priority:'med',status:'todo',assignee:''}
   ]},
-  {id:'database',icon:'\uD83D\uDDC4\uFE0F',title:'8. Database & Infrastructure',desc:'Tables: authors, works, documents, chunks, embeddings, concepts, doctrines, citations, traditions, councils, creeds, confessions, scholars, knowledge_graph, cross_references. PostgreSQL + pgvector.',tasks:[
+  {id:'governance',icon:'\u2696\uFE0F',title:'8. Doctrinal Governance & QA',desc:'Credibility comes from ecclesial alignment. Review board of confessionally Reformed pastors/elders holds veto over corpus additions and signs off on the eval set.',tasks:[
+    {title:'Recruit doctrinal review board (2-3 Reformed pastors/elders)',desc:'Before writing more code',priority:'high',status:'todo',assignee:''},
+    {title:'Define corpus inclusion/exclusion criteria',desc:'Confessional Reformed spine + patristics; what stays out and why',priority:'high',status:'todo',assignee:''},
+    {title:'Doctrinal sign-off workflow for eval set + prompts',desc:'',priority:'med',status:'todo',assignee:''},
+    {title:'Closed beta with 2-3 Reformed pastors before launch',desc:'',priority:'med',status:'todo',assignee:''}
+  ]},
+  {id:'database',icon:'\uD83D\uDDC4\uFE0F',title:'9. Database & Infrastructure',desc:'Tables: authors, works, documents, chunks, embeddings, concepts, doctrines, citations, traditions, councils, creeds, confessions, scholars, knowledge_graph, cross_references. PostgreSQL + pgvector.',tasks:[
     {title:'Design PostgreSQL schema',desc:'',priority:'high',status:'todo',assignee:''},
     {title:'Set up pgvector extension',desc:'',priority:'high',status:'todo',assignee:''},
-    {title:'Configure Azure Blob Storage for raw documents',desc:'',priority:'med',status:'todo',assignee:''},
+    {title:'Set up Supabase (managed Postgres + pgvector + storage)',desc:'Raw docs in Supabase storage; ~$50-150/mo to start',priority:'med',status:'todo',assignee:''},
     {title:'Dockerize the application',desc:'',priority:'med',status:'todo',assignee:''},
     {title:'Set up CI/CD pipeline',desc:'',priority:'low',status:'todo',assignee:''},
     {title:'Plan Kubernetes deployment (future)',desc:'',priority:'low',status:'todo',assignee:''}
   ]},
-  {id:'frontend',icon:'\uD83C\uDFA8',title:'9. Frontend (Nuxt 4)',desc:'Nuxt 4 + Tailwind CSS + Nuxt UI. The user-facing research interface — search, browse, read citations, compare traditions.',tasks:[
+  {id:'frontend',icon:'\uD83C\uDFA8',title:'10. Frontend (Nuxt 4)',desc:'Nuxt 4 + Tailwind CSS + Nuxt UI. The user-facing research interface — search, browse, read citations, compare traditions.',tasks:[
     {title:'Scaffold Nuxt 4 project',desc:'',priority:'high',status:'todo',assignee:''},
     {title:'Set up Tailwind CSS + Nuxt UI',desc:'',priority:'med',status:'todo',assignee:''},
     {title:'Build search interface',desc:'',priority:'med',status:'todo',assignee:''},
@@ -354,7 +383,7 @@ const DEFAULT_SECTIONS = [
 ];
 
 const ROLE_COLORS = {'Frontend':'#4263eb','Backend':'#7048e8','AI/ML':'#0ca678','Data':'#f59f00','DevOps':'#1971c2','Research':'#e03131','Design':'#6b7494','PM':'#9c36b5'};
-const EXTRA_PALETTE = ['#0c8599','#9c36b5','#f06595','##7950f2','#1098ad','#5c7cfa','#e8590c','#ae3ec9','#4c6ef5','#15aabf'];
+const EXTRA_PALETTE = ['#0c8599','#9c36b5','#f06595','#7950f2','#1098ad','#5c7cfa','#e8590c','#ae3ec9','#4c6ef5','#15aabf'];
 
 let state = { members:[], sections:[], collapsed:{} };
 let editingTask = null;
